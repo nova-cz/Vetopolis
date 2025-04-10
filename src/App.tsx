@@ -14,6 +14,8 @@ import RegisterPage from "./pages/RegisterPage";
 import AppointmentsPage from "./pages/AppointmentsPage";
 import JoinAsProfessional from "./pages/JoinAsProfessional";
 import ProfilePage from "@/pages/ProfilePage";
+import AppointmentFormPage from "./pages/AppointmentFormPage";
+
 
 const queryClient = new QueryClient();
 
@@ -34,6 +36,8 @@ const App = () => (
           <Route path="/appointments" element={<AppointmentsPage />} />
           <Route path="/book/:id" element={<AppointmentsPage />} />
           <Route path="/join-professional" element={<JoinAsProfessional />} />
+          <Route path="/appointment/:id" element={<AppointmentFormPage />} />
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
