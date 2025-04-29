@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { 
-  Menu, 
-  X, 
-  Search, 
-  Calendar, 
-  Map, 
+import {
+  Menu,
+  X,
+  Search,
+  Calendar,
+  Map,
   User,
-  ChevronDown
+  ChevronDown,
+  ShieldCheck
 } from "lucide-react";
 import DarkModeToggle from "./DarkModeToggle";
 import {
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { ADMIN_EMAIL } from "@/lib/admin"; // ✅ importa correo admin
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -83,6 +85,14 @@ const Navbar = () => {
             <Map className="h-4 w-4" />
             <span>Mapa</span>
           </Link>
+
+          {/* ✅ Solo visible si es el correo del admin */}
+          {user?.email === ADMIN_EMAIL && (
+            <Link to="/admin" className="flex items-center space-x-1 text-primary hover:underline text-sm font-medium">
+              <ShieldCheck className="h-4 w-4" />
+              <span>Panel Admin</span>
+            </Link>
+          )}
         </nav>
 
         {/* Desktop auth buttons */}
@@ -110,10 +120,10 @@ const Navbar = () => {
         {/* Mobile nav toggle */}
         <div className="md:hidden flex items-center space-x-2">
           <DarkModeToggle />
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="md:hidden" 
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
             onClick={toggleMenu}
           >
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -125,35 +135,43 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden animate-in">
           <div className="container py-4 space-y-4">
-            <Link 
-              to="/search" 
+            <Link
+              to="/search"
               className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent"
               onClick={toggleMenu}
             >
               <Search className="h-5 w-5" />
               <span>Buscar Veterinarios</span>
             </Link>
-            <Link 
-              to="/appointments" 
+            <Link
+              to="/appointments"
               className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent"
               onClick={toggleMenu}
             >
               <Calendar className="h-5 w-5" />
               <span>Citas</span>
-              {appointments.length > 0 && (
-                <span className="ml-auto bg-primary text-primary-foreground text-xs rounded-full px-2 py-1">
-                  {appointments.length}
-                </span>
-              )}
             </Link>
-            <Link 
-              to="/map" 
+            <Link
+              to="/map"
               className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent"
               onClick={toggleMenu}
             >
               <Map className="h-5 w-5" />
               <span>Mapa</span>
             </Link>
+
+            {/* ✅ Mobile admin button */}
+            {user?.email === ADMIN_EMAIL && (
+              <Link
+                to="/admin"
+                onClick={toggleMenu}
+                className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent text-primary"
+              >
+                <ShieldCheck className="h-5 w-5" />
+                <span>Panel Admin</span>
+              </Link>
+            )}
+
             <div className="flex flex-col space-y-2 pt-2 border-t">
               {user ? (
                 <Link to="/profile" onClick={toggleMenu}>
