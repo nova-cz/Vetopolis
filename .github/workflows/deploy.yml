@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 👈 ¡Clave para que funcione el push a gh-pages!
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
