@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MapPage from "./pages/MapPage";
@@ -14,9 +14,6 @@ import AppointmentsPage from "./pages/AppointmentsPage";
 import JoinAsProfessional from "./pages/JoinAsProfessional";
 import ProfilePage from "@/pages/ProfilePage";
 import AppointmentFormPage from "./pages/AppointmentFormPage";
-import AdminDashboard from "./pages/AdminDashboard";
-import { auth } from "@/lib/firebase";
-import { ADMIN_EMAIL } from "@/lib/admin"; // asegúrate de tener este archivo con el correo del admin
 
 const queryClient = new QueryClient();
 
@@ -38,17 +35,6 @@ const App = () => (
           <Route path="/book/:id" element={<AppointmentsPage />} />
           <Route path="/join-professional" element={<JoinAsProfessional />} />
           <Route path="/appointment/:id" element={<AppointmentFormPage />} />
-          <Route
-            path="/admin"
-            element={
-              auth.currentUser?.email === ADMIN_EMAIL ? (
-                <AdminDashboard />
-              ) : (
-                <Navigate to="/" />
-              )
-            }
-          />
-          {/* Ruta de error */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Heart, Calendar, Star, ChevronRight, ArrowRight, Search } from "lucide-react";
+import {
+  MapPin,
+  Heart,
+  Calendar,
+  Star,
+  ChevronRight,
+  ArrowRight,
+  Search
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
@@ -51,9 +59,22 @@ const Index = () => {
   useEffect(() => {
     setIsHeroVisible(true);
     const fetchApprovedDoctors = async () => {
-      const q = query(collection(db, "doctors"), where("approved", "==", true));
+      const q = query(collection(db, "doctors"), where("status", "==", "approved"));
       const snapshot = await getDocs(q);
-      const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const docs = snapshot.docs.map((doc) => {
+        const vet = doc.data();
+        return {
+          id: doc.id,
+          name: vet.fullName,
+          specialty: vet.specialties?.[0] || "General",
+          image: vet.image || "https://placekitten.com/400/300",
+          rating: vet.rating || 4.9,
+          reviewCount: vet.reviewCount || 8,
+          location: vet.city || "Ciudad no especificada",
+          distance: vet.distance || "Cerca de ti",
+          availability: vet.availability || "Lunes a Viernes",
+        };
+      });
       setFeaturedVets(docs);
     };
     fetchApprovedDoctors();
@@ -69,7 +90,7 @@ const Index = () => {
 
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-primary/20 to-secondary/40 py-20 md:py-32 overflow-hidden">
-        <div 
+        <div
           className={`container max-w-5xl mx-auto px-4 md:px-6 relative z-10 transition-all duration-1000 ${
             isHeroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
           }`}
@@ -91,15 +112,15 @@ const Index = () => {
 
             <div className="flex flex-wrap justify-center gap-4 mt-6 text-sm text-muted-foreground">
               <span className="flex items-center">
-                <Star className="h-4 w-4 text-yellow-500 mr-1" /> 
+                <Star className="h-4 w-4 text-yellow-500 mr-1" />
                 <span>Más de 2000 veterinarios verificados</span>
               </span>
               <span className="flex items-center">
-                <Calendar className="h-4 w-4 text-primary mr-1" /> 
+                <Calendar className="h-4 w-4 text-primary mr-1" />
                 <span>Agenda citas 24/7</span>
               </span>
               <span className="flex items-center">
-                <MapPin className="h-4 w-4 text-primary mr-1" /> 
+                <MapPin className="h-4 w-4 text-primary mr-1" />
                 <span>Encuentra veterinarios cercanos</span>
               </span>
             </div>
@@ -163,7 +184,9 @@ const Index = () => {
                 <VetCard key={vet.id} {...vet} />
               ))
             ) : (
-              <p className="text-center col-span-full text-muted-foreground">No hay veterinarios aprobados para mostrar.</p>
+              <p className="text-center col-span-full text-muted-foreground">
+                No hay veterinarios aprobados para mostrar.
+              </p>
             )}
           </div>
         </div>

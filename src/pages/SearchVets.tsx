@@ -39,7 +39,20 @@ const SearchVets = () => {
       try {
         const q = query(collection(db, "doctors"), where("status", "==", "approved"));
         const querySnapshot = await getDocs(q);
-        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const data = querySnapshot.docs.map(doc => {
+          const vet = doc.data();
+          return {
+            id: doc.id,
+            name: vet.fullName,
+            specialty: vet.specialties?.[0] || "General",
+            image: vet.image || "https://placekitten.com/400/300",
+            rating: vet.rating || 4.8,
+            reviewCount: vet.reviewCount || 12,
+            location: vet.city || "Ubicación no especificada",
+            distance: vet.distance || "1.2 km",
+            availability: vet.availability || "Lunes a Viernes",
+          };
+        });
         setVets(data);
       } catch (error) {
         console.error("Error fetching approved doctors:", error);
@@ -53,13 +66,13 @@ const SearchVets = () => {
   const filteredVets = vets.filter((vet) => {
     if (
       searchQuery &&
-      !vet.specialty?.join(" ").toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !vet.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+      !vet.specialty.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !vet.name.toLowerCase().includes(searchQuery.toLowerCase())
     ) {
       return false;
     }
 
-    if (selectedFilters.availableToday && !vet.availability?.includes("hoy")) {
+    if (selectedFilters.availableToday && !vet.availability?.toLowerCase().includes("hoy")) {
       return false;
     }
 

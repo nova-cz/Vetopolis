@@ -8,8 +8,7 @@ import {
   Calendar,
   Map,
   User,
-  ChevronDown,
-  ShieldCheck
+  ChevronDown
 } from "lucide-react";
 import DarkModeToggle from "./DarkModeToggle";
 import {
@@ -20,7 +19,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { ADMIN_EMAIL } from "@/lib/admin"; // ✅ importa correo admin
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -85,14 +83,6 @@ const Navbar = () => {
             <Map className="h-4 w-4" />
             <span>Mapa</span>
           </Link>
-
-          {/* ✅ Solo visible si es el correo del admin */}
-          {user?.email === ADMIN_EMAIL && (
-            <Link to="/admin" className="flex items-center space-x-1 text-primary hover:underline text-sm font-medium">
-              <ShieldCheck className="h-4 w-4" />
-              <span>Panel Admin</span>
-            </Link>
-          )}
         </nav>
 
         {/* Desktop auth buttons */}
@@ -159,18 +149,6 @@ const Navbar = () => {
               <Map className="h-5 w-5" />
               <span>Mapa</span>
             </Link>
-
-            {/* ✅ Mobile admin button */}
-            {user?.email === ADMIN_EMAIL && (
-              <Link
-                to="/admin"
-                onClick={toggleMenu}
-                className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent text-primary"
-              >
-                <ShieldCheck className="h-5 w-5" />
-                <span>Panel Admin</span>
-              </Link>
-            )}
 
             <div className="flex flex-col space-y-2 pt-2 border-t">
               {user ? (

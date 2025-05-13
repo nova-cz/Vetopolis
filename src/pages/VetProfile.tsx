@@ -3,8 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import {
-  MapPin, Star, Clock, Calendar, Phone, Mail, Globe, Heart, Award,
-  ThumbsUp, ThumbsDown, ChevronDown, ChevronUp
+  MapPin, Star, Clock, Calendar, Phone, Mail, ChevronDown, ChevronUp
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,13 +16,12 @@ const VetProfile = () => {
   const [vet, setVet] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [showMoreBio, setShowMoreBio] = useState(false);
-  const [showAllReviews, setShowAllReviews] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchVet = async () => {
       if (!id) return;
-      const docRef = doc(db, "vets", id);
+      const docRef = doc(db, "doctors", id);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
@@ -67,11 +65,15 @@ const VetProfile = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <div className="relative h-48 md:h-64 lg:h-80 overflow-hidden">
-        <img src={vet.coverImage} alt="Portada" className="w-full h-full object-cover" />
+        <img
+          src={vet.coverImage || "https://images.unsplash.com/photo-1607746882042-944635dfe10e"}
+          alt="Portada"
+          className="w-full h-full object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent"></div>
       </div>
 
-      <main className="container py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:order-1 order-2">
             <div className="sticky top-20 space-y-6">
@@ -79,10 +81,10 @@ const VetProfile = () => {
                 <div className="p-6 space-y-4">
                   <div className="flex flex-col items-center text-center">
                     <div className="relative -mt-20 mb-4">
-                      <img src={vet.image} alt={vet.fullName} className="w-32 h-32 rounded-full border-4 border-background object-cover" />
+                      <img src={vet.image} alt={vet.fullName} className="w-40 h-40 rounded-full border-4 border-primary object-cover shadow-lg" />
                     </div>
-                    <h2 className="text-2xl font-bold">{vet.fullName}</h2>
-                    <Badge className="mt-2 bg-primary text-white">{vet.specialty[0]}</Badge>
+                    <h2 className="text-3xl font-bold">{vet.fullName}</h2>
+                    <Badge className="mt-2 bg-primary text-white">{vet.specialties?.[0]}</Badge>
                   </div>
 
                   <hr className="border-border" />
@@ -135,7 +137,7 @@ const VetProfile = () => {
             <Tabs defaultValue="about">
               <TabsList className="grid grid-cols-2 mb-8">
                 <TabsTrigger value="about">Sobre mí</TabsTrigger>
-                <TabsTrigger value="experience">Experiencia</TabsTrigger>
+                <TabsTrigger value="experience">Especialidades</TabsTrigger>
               </TabsList>
 
               <TabsContent value="about" className="space-y-8">
@@ -154,15 +156,26 @@ const VetProfile = () => {
               <TabsContent value="experience">
                 <h3 className="text-2xl font-bold mb-4">Especialidades</h3>
                 <div className="flex flex-wrap gap-2">
-                  {vet.specialty.map((spec: string, index: number) => (
+                  {vet.specialties?.map((spec: string, index: number) => (
                     <Badge key={index} variant="outline">{spec}</Badge>
                   ))}
                 </div>
               </TabsContent>
             </Tabs>
+
+            <section className="mt-12">
+              <h3 className="text-2xl font-bold mb-4">Reseñas recientes</h3>
+              <p className="text-muted-foreground">Aún no hay reseñas disponibles para este perfil.</p>
+            </section>
           </div>
         </div>
       </main>
+
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button size="lg" className="rounded-full shadow-lg" onClick={() => navigate(`/appointment/${id}`)}>
+          Reservar cita
+        </Button>
+      </div>
 
       <Footer />
     </div>
