@@ -141,6 +141,7 @@ const LoginPage = () => {
               <Link to="/forgot-password" className="text-sm text-primary hover:underline">
                 ¿Olvidaste tu contraseña?
               </Link>
+              
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>

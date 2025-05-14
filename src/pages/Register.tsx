@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -27,26 +26,107 @@ const Register = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
+  // Estado para errores de validación
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
+  });
+  
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Función para validar el correo electrónico
+  const validateEmail = (email) => {
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    return emailRegex.test(email);
+  };
+  
+  // Función para validar la contraseña
+  const validatePassword = (password) => {
+    return password.length >= 8;
+  };
+  
+  // Función para validar el nombre
+  const validateName = (name) => {
+    return name.trim().length >= 3 && /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(name);
+  };
+  
+  // Validación en tiempo real para el email
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
+    setEmail(value);
     
-    if (!name || !email || !password || !confirmPassword) {
-      toast({
-        variant: "destructive",
-        title: "Error de registro",
-        description: "Por favor, completa todos los campos.",
-      });
-      return;
+    if (value && !validateEmail(value)) {
+      setErrors(prev => ({ ...prev, email: "Formato de correo electrónico inválido" }));
+    } else {
+      setErrors(prev => ({ ...prev, email: "" }));
+    }
+  };
+  
+  // Validación en tiempo real para el nombre
+  const handleNameChange = (e) => {
+    const value = e.target.value;
+    setName(value);
+    
+    if (value && !validateName(value)) {
+      setErrors(prev => ({ ...prev, name: "El nombre debe contener solo letras y tener al menos 3 caracteres" }));
+    } else {
+      setErrors(prev => ({ ...prev, name: "" }));
+    }
+  };
+  
+  // Validación en tiempo real para la contraseña
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setPassword(value);
+    
+    if (value && !validatePassword(value)) {
+      setErrors(prev => ({ ...prev, password: "La contraseña debe tener al menos 8 caracteres" }));
+    } else {
+      setErrors(prev => ({ ...prev, password: "" }));
     }
     
-    if (password !== confirmPassword) {
+    // Validar confirmación de contraseña si ya tiene valor
+    if (confirmPassword && value !== confirmPassword) {
+      setErrors(prev => ({ ...prev, confirmPassword: "Las contraseñas no coinciden" }));
+    } else if (confirmPassword) {
+      setErrors(prev => ({ ...prev, confirmPassword: "" }));
+    }
+  };
+  
+  // Validación en tiempo real para confirmación de contraseña
+  const handleConfirmPasswordChange = (e) => {
+    const value = e.target.value;
+    setConfirmPassword(value);
+    
+    if (value !== password) {
+      setErrors(prev => ({ ...prev, confirmPassword: "Las contraseñas no coinciden" }));
+    } else {
+      setErrors(prev => ({ ...prev, confirmPassword: "" }));
+    }
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validar todos los campos antes de enviar
+    const newErrors = {
+      name: !name ? "El nombre es requerido" : !validateName(name) ? "El nombre debe contener solo letras y tener al menos 3 caracteres" : "",
+      email: !email ? "El correo es requerido" : !validateEmail(email) ? "Formato de correo electrónico inválido" : "",
+      password: !password ? "La contraseña es requerida" : !validatePassword(password) ? "La contraseña debe tener al menos 8 caracteres" : "",
+      confirmPassword: !confirmPassword ? "Confirma tu contraseña" : password !== confirmPassword ? "Las contraseñas no coinciden" : ""
+    };
+    
+    setErrors(newErrors);
+    
+    // Verificar si hay errores
+    if (Object.values(newErrors).some(error => error !== "")) {
       toast({
         variant: "destructive",
-        title: "Error de registro",
-        description: "Las contraseñas no coinciden.",
+        title: "Error de validación",
+        description: "Por favor, corrige los errores en el formulario.",
       });
       return;
     }
@@ -95,9 +175,13 @@ const Register = () => {
                     id="name"
                     placeholder="Tu nombre"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={handleNameChange}
                     required
+                    className={errors.name ? "border-red-500" : ""}
                   />
+                  {errors.name && (
+                    <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -107,9 +191,13 @@ const Register = () => {
                     type="email"
                     placeholder="tu@ejemplo.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
                     required
+                    className={errors.email ? "border-red-500" : ""}
                   />
+                  {errors.email && (
+                    <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -119,9 +207,13 @@ const Register = () => {
                     type="password"
                     placeholder="Crea una contraseña"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={handlePasswordChange}
                     required
+                    className={errors.password ? "border-red-500" : ""}
                   />
+                  {errors.password && (
+                    <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -131,9 +223,13 @@ const Register = () => {
                     type="password"
                     placeholder="Confirma tu contraseña"
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={handleConfirmPasswordChange}
                     required
+                    className={errors.confirmPassword ? "border-red-500" : ""}
                   />
+                  {errors.confirmPassword && (
+                    <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -166,7 +262,11 @@ const Register = () => {
                   </Label>
                 </div>
                 
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isLoading || Object.values(errors).some(error => error !== "")}
+                >
                   {isLoading ? "Registrando..." : "Registrarse"}
                 </Button>
               </form>

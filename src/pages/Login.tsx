@@ -92,6 +92,7 @@ const Login = () => {
                     >
                       ¿Olvidaste tu contraseña?
                     </Link>
+                    
                   </div>
                   <Input
                     id="password"

@@ -10,6 +10,7 @@ import VetProfile from "./pages/VetProfile";
 import SearchVets from "./pages/SearchVets";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import ForgotPassword from "./pages/ForgotPassword";
 import AppointmentsPage from "./pages/AppointmentsPage";
 import JoinAsProfessional from "./pages/JoinAsProfessional";
 import ProfilePage from "@/pages/ProfilePage";
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/book/:id" element={<AppointmentsPage />} />
           <Route path="/join-professional" element={<JoinAsProfessional />} />
           <Route path="/appointment/:id" element={<AppointmentFormPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route
             path="/admin"
             element={
