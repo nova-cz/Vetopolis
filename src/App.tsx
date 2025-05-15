@@ -14,6 +14,7 @@ import AppointmentsPage from "./pages/AppointmentsPage";
 import JoinAsProfessional from "./pages/JoinAsProfessional";
 import ProfilePage from "@/pages/ProfilePage";
 import AppointmentFormPage from "./pages/AppointmentFormPage";
+import BookAppointment from "./pages/BookAppointment";
 
 const queryClient = new QueryClient();
 
@@ -32,7 +33,7 @@ const App = () => (
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/appointments" element={<AppointmentsPage />} />
-          <Route path="/book/:id" element={<AppointmentsPage />} />
+          <Route path="/book/:id" element={<BookAppointment />} />
           <Route path="/join-professional" element={<JoinAsProfessional />} />
           <Route path="/appointment/:id" element={<AppointmentFormPage />} />
           <Route path="*" element={<NotFound />} />

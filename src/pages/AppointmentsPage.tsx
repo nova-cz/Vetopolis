@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { Calendar as CalendarIcon, MapPin, Search, X } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { getAuth } from "firebase/auth";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../lib/firebase";
 
 import {
   Tabs,
@@ -27,6 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 interface Appointment {
   id: string;
   date: Date;
+  selectedTime: string;
   vetName: string;
   vetSpecialty: string;
   clinicName: string;
@@ -72,20 +76,42 @@ const AppointmentsPage = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const savedAppointments = localStorage.getItem("appointments");
+    const fetchAppointments = async () => {
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
 
-    if (savedAppointments) {
-      const allAppointments = JSON.parse(savedAppointments).map((appt: any) => ({
-        ...appt,
-        date: new Date(appt.date),
-      }));
+        if (!user) throw new Error("Usuario no autenticado");
 
-      const upcoming = allAppointments.filter(appt => new Date(appt.date) > new Date());
-      const past = allAppointments.filter(appt => new Date(appt.date) <= new Date());
+        const q = query(collection(db, "citas"), where("userId", "==", user.uid));
+        const querySnapshot = await getDocs(q);
 
-      setUpcomingAppointments(upcoming);
-      setPastAppointments(past);
-    }
+        const allAppointments: Appointment[] = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            date: new Date(data.selectedDate),
+            selectedTime: data.selectedTime || "",
+            vetName: data.vetName || "",
+            vetSpecialty: data.selectedSpecialty || "", // mapea si en Firestore está como selectedSpecialty
+            clinicName: data.clinicName || "",
+            address: data.address || "",
+            status: data.status || "pending",
+          };
+        });
+
+        const now = new Date();
+        const upcoming = allAppointments.filter((appt) => appt.date > now);
+        const past = allAppointments.filter((appt) => appt.date <= now);
+
+        setUpcomingAppointments(upcoming);
+        setPastAppointments(past);
+      } catch (error) {
+        console.error("Error al cargar las citas:", error);
+      }
+    };
+
+    fetchAppointments();
   }, []);
 
   const handleCancelAppointment = (appointmentId: string) => {
@@ -93,12 +119,9 @@ const AppointmentsPage = () => {
     const cancelledAppt = upcomingAppointments.find(appt => appt.id === appointmentId);
 
     if (cancelledAppt) {
-      const cancelled = { ...cancelledAppt, status: "cancelled" };
-      const updatedPast = [...pastAppointments, cancelled];
-
+      const cancelled: Appointment = { ...cancelledAppt, status: "cancelled" };
       setUpcomingAppointments(updatedAppointments);
-      setPastAppointments(updatedPast);
-      localStorage.setItem("appointments", JSON.stringify([...updatedAppointments, ...updatedPast]));
+      setPastAppointments([...pastAppointments, cancelled]);
     }
 
     toast({
@@ -169,7 +192,7 @@ const AppointmentsPage = () => {
                               {format(appt.date, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: es })}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              {format(appt.date, "HH:mm", { locale: es })} hrs
+                              {appt.selectedTime} hrs
                             </p>
                           </div>
                         </div>
@@ -230,7 +253,7 @@ const AppointmentsPage = () => {
                               {format(appt.date, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: es })}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              {format(appt.date, "HH:mm", { locale: es })} hrs
+                              {appt.selectedTime} hrs
                             </p>
                           </div>
                         </div>

@@ -1,4 +1,3 @@
-import { useToast } from "@/hooks/use-toast"
 import {
   Toast,
   ToastClose,
@@ -7,6 +6,9 @@ import {
   ToastTitle,
   ToastViewport,
 } from "@/components/ui/toast"
+
+import { toast, useToast } from "@/components/ui/use-toast"
+import { Button } from "@/components/ui/button"
 
 export function Toaster() {
   const { toasts } = useToast()
@@ -18,11 +20,22 @@ export function Toaster() {
           <Toast key={id} {...props}>
             <div className="grid gap-1">
               {title && <ToastTitle>{title}</ToastTitle>}
-              {description && (
-                <ToastDescription>{description}</ToastDescription>
-              )}
+              {description && <ToastDescription>{description}</ToastDescription>}
             </div>
-            {action}
+
+            {action ? (
+              action
+            ) : (
+              <Button
+                onClick={() => toast.dismiss(id)}
+                size="sm"
+                variant="ghost"
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                Cerrar
+              </Button>
+            )}
+
             <ToastClose />
           </Toast>
         )

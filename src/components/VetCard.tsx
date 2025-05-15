@@ -72,7 +72,7 @@ const VetCard = ({
         <Link to={`/vet/${id}`} className="flex-1">
           <Button variant="outline" className="w-full">Ver perfil</Button>
         </Link>
-        <Link to={`/appointments`} className="flex-1">
+        <Link to={`/book/${id}`} className="flex-1">
           <Button className="w-full">Agendar cita</Button>
         </Link>
       </CardFooter>
