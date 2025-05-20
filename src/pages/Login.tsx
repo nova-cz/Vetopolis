@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,23 +10,70 @@ import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+// Función para validar el formato del email
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
+  // Estados para manejar errores de validación
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Validar email cada vez que cambia
+  useEffect(() => {
+    if (email && !isValidEmail(email)) {
+      setEmailError("Por favor, ingresa un correo electrónico válido");
+    } else {
+      setEmailError("");
+    }
+  }, [email]);
+  
+  // Validar contraseña cada vez que cambia
+  useEffect(() => {
+    if (password && password.length < 6) {
+      setPasswordError("La contraseña debe tener al menos 6 caracteres");
+    } else {
+      setPasswordError("");
+    }
+  }, [password]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validación final antes de enviar
     if (!email || !password) {
       toast({
         variant: "destructive",
         title: "Error de inicio de sesión",
         description: "Por favor, completa todos los campos.",
+      });
+      return;
+    }
+    
+    if (!isValidEmail(email)) {
+      toast({
+        variant: "destructive",
+        title: "Error de formato",
+        description: "Por favor, ingresa un correo electrónico válido.",
+      });
+      return;
+    }
+    
+    if (password.length < 6) {
+      toast({
+        variant: "destructive",
+        title: "Error de formato",
+        description: "La contraseña debe tener al menos 6 caracteres.",
       });
       return;
     }
@@ -55,6 +101,18 @@ const Login = () => {
     }, 1500);
   };
   
+  // Manejador de cambios para el correo electrónico con validación
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+  };
+  
+  // Manejador de cambios para la contraseña con validación
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPassword(value);
+  };
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -78,9 +136,13 @@ const Login = () => {
                     type="email"
                     placeholder="tu@ejemplo.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
+                    className={emailError ? "border-red-500" : ""}
                     required
                   />
+                  {emailError && (
+                    <p className="text-sm text-red-500">{emailError}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -98,9 +160,13 @@ const Login = () => {
                     type="password"
                     placeholder="••••••••"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={handlePasswordChange}
+                    className={passwordError ? "border-red-500" : ""}
                     required
                   />
+                  {passwordError && (
+                    <p className="text-sm text-red-500">{passwordError}</p>
+                  )}
                 </div>
                 
                 <div className="flex items-center space-x-2">
@@ -114,7 +180,11 @@ const Login = () => {
                   <Label htmlFor="remember" className="text-sm">Recordarme</Label>
                 </div>
                 
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isLoading || !!emailError || !!passwordError}
+                >
                   {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
                 </Button>
               </form>
