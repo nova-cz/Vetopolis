@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,21 +11,74 @@ import Footer from "@/components/Footer";
 import { auth } from "@/lib/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
+// Función para validar el formato del email
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+// Función para validar contraseña (mínimo 6 caracteres)
+const isValidPassword = (password: string): boolean => {
+  return password.length >= 6;
+};
+
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  // Estados para manejar errores de validación
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  
   const { toast } = useToast();
+
+  // Validar email cada vez que cambia
+  useEffect(() => {
+    if (email && !isValidEmail(email)) {
+      setEmailError("Por favor, ingresa un correo electrónico válido");
+    } else {
+      setEmailError("");
+    }
+  }, [email]);
+  
+  // Validar contraseña cada vez que cambia
+  useEffect(() => {
+    if (password && !isValidPassword(password)) {
+      setPasswordError("La contraseña debe tener al menos 6 caracteres");
+    } else {
+      setPasswordError("");
+    }
+  }, [password]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validación final antes de enviar
     if (!email.trim() || !password.trim()) {
       toast({
         title: "Campos requeridos",
         description: "Por favor completa todos los campos",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!isValidEmail(email)) {
+      toast({
+        title: "Formato inválido",
+        description: "Por favor, ingresa un correo electrónico válido",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!isValidPassword(password)) {
+      toast({
+        title: "Formato inválido",
+        description: "La contraseña debe tener al menos 6 caracteres",
         variant: "destructive",
       });
       return;
@@ -91,13 +144,16 @@ const LoginPage = () => {
                   id="email"
                   type="email"
                   placeholder="tu@correo.com"
-                  className="pl-10"
+                  className={`pl-10 ${emailError ? "border-red-500 focus:ring-red-500" : ""}`}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
                   required
                 />
               </div>
+              {emailError && (
+                <p className="text-sm text-red-500">{emailError}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -108,7 +164,7 @@ const LoginPage = () => {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className="pl-10"
+                  className={`pl-10 ${passwordError ? "border-red-500 focus:ring-red-500" : ""}`}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
@@ -124,6 +180,9 @@ const LoginPage = () => {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
+              {passwordError && (
+                <p className="text-sm text-red-500">{passwordError}</p>
+              )}
             </div>
 
             <div className="flex items-center justify-between">
@@ -143,7 +202,11 @@ const LoginPage = () => {
               </Link>
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={loading || !!emailError || !!passwordError}
+            >
               {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
             </Button>
 

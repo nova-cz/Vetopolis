@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +17,24 @@ import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+// Funciones de validación
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const isValidName = (name: string): boolean => {
+  // Solo letras, espacios y algunos caracteres especiales como acentos
+  const nameRegex = /^[a-zA-ZáéíóúüÁÉÍÓÚÜñÑ\s.'-]+$/;
+  return nameRegex.test(name);
+};
+
+const isStrongPassword = (password: string): boolean => {
+  // Al menos 8 caracteres, una mayúscula, una minúscula, un número
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+  return passwordRegex.test(password);
+};
+
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -27,12 +44,55 @@ const Register = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
+  // Estados para errores de validación
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Validar nombre cuando cambia
+  useEffect(() => {
+    if (name && !isValidName(name)) {
+      setNameError("El nombre solo debe contener letras y espacios");
+    } else {
+      setNameError("");
+    }
+  }, [name]);
+  
+  // Validar email cuando cambia
+  useEffect(() => {
+    if (email && !isValidEmail(email)) {
+      setEmailError("Por favor, ingresa un correo electrónico válido");
+    } else {
+      setEmailError("");
+    }
+  }, [email]);
+  
+  // Validar contraseña cuando cambia
+  useEffect(() => {
+    if (password && !isStrongPassword(password)) {
+      setPasswordError("La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número");
+    } else {
+      setPasswordError("");
+    }
+  }, [password]);
+  
+  // Validar confirmación de contraseña
+  useEffect(() => {
+    if (confirmPassword && password !== confirmPassword) {
+      setConfirmPasswordError("Las contraseñas no coinciden");
+    } else {
+      setConfirmPasswordError("");
+    }
+  }, [confirmPassword, password]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validaciones generales
     if (!name || !email || !password || !confirmPassword) {
       toast({
         variant: "destructive",
@@ -42,6 +102,37 @@ const Register = () => {
       return;
     }
     
+    // Validar formato de nombre
+    if (!isValidName(name)) {
+      toast({
+        variant: "destructive",
+        title: "Error de formato",
+        description: "El nombre solo debe contener letras y espacios.",
+      });
+      return;
+    }
+    
+    // Validar formato de email
+    if (!isValidEmail(email)) {
+      toast({
+        variant: "destructive",
+        title: "Error de formato",
+        description: "Por favor, ingresa un correo electrónico válido.",
+      });
+      return;
+    }
+    
+    // Validar fortaleza de contraseña
+    if (!isStrongPassword(password)) {
+      toast({
+        variant: "destructive",
+        title: "Contraseña débil",
+        description: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.",
+      });
+      return;
+    }
+    
+    // Validar coincidencia de contraseñas
     if (password !== confirmPassword) {
       toast({
         variant: "destructive",
@@ -51,6 +142,7 @@ const Register = () => {
       return;
     }
     
+    // Validar aceptación de términos
     if (!termsAccepted) {
       toast({
         variant: "destructive",
@@ -71,6 +163,27 @@ const Register = () => {
       navigate("/");
       setIsLoading(false);
     }, 1500);
+  };
+  
+  // Manejadores de cambio con restricciones de tipo de datos
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setName(value);
+  };
+  
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+  };
+  
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPassword(value);
+  };
+  
+  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setConfirmPassword(value);
   };
   
   return (
@@ -95,9 +208,13 @@ const Register = () => {
                     id="name"
                     placeholder="Tu nombre"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={handleNameChange}
+                    className={nameError ? "border-red-500" : ""}
                     required
                   />
+                  {nameError && (
+                    <p className="text-sm text-red-500">{nameError}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -107,9 +224,13 @@ const Register = () => {
                     type="email"
                     placeholder="tu@ejemplo.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
+                    className={emailError ? "border-red-500" : ""}
                     required
                   />
+                  {emailError && (
+                    <p className="text-sm text-red-500">{emailError}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -119,9 +240,13 @@ const Register = () => {
                     type="password"
                     placeholder="Crea una contraseña"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={handlePasswordChange}
+                    className={passwordError ? "border-red-500" : ""}
                     required
                   />
+                  {passwordError && (
+                    <p className="text-sm text-red-500">{passwordError}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -131,9 +256,13 @@ const Register = () => {
                     type="password"
                     placeholder="Confirma tu contraseña"
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={handleConfirmPasswordChange}
+                    className={confirmPasswordError ? "border-red-500" : ""}
                     required
                   />
+                  {confirmPasswordError && (
+                    <p className="text-sm text-red-500">{confirmPasswordError}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -166,7 +295,11 @@ const Register = () => {
                   </Label>
                 </div>
                 
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isLoading || !!nameError || !!emailError || !!passwordError || !!confirmPasswordError}
+                >
                   {isLoading ? "Registrando..." : "Registrarse"}
                 </Button>
               </form>

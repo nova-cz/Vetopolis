@@ -63,11 +63,11 @@ const Footer = () => {
             <ul className="space-y-2">
               <li className="flex items-start space-x-2">
                 <MapPin size={18} className="text-primary mt-1 flex-shrink-0" />
-                <span className="text-muted-foreground">Av. Universidad 3000, Ciudad de México</span>
+                <span className="text-muted-foreground">Avenida Central, Ciudad Universitaria, 72570 Puebla, Pueo</span>
               </li>
               <li className="flex items-start space-x-2">
                 <Phone size={18} className="text-primary mt-1 flex-shrink-0" />
-                <span className="text-muted-foreground">+52 55 1234 5678</span>
+                <span className="text-muted-foreground">+52 222 1256 4958</span>
               </li>
               <li className="flex items-start space-x-2">
                 <Mail size={18} className="text-primary mt-1 flex-shrink-0" />
@@ -76,23 +76,7 @@ const Footer = () => {
             </ul>
           </div>
           
-          {/* Newsletter */}
-          <div>
-            <h4 className="font-semibold text-lg mb-4">Boletín informativo</h4>
-            <p className="text-muted-foreground mb-2">
-              Suscríbete para recibir consejos de cuidado de mascotas y ofertas especiales.
-            </p>
-            <form className="flex gap-2">
-              <input
-                type="email"
-                placeholder="Tu correo electrónico"
-                className="px-3 py-2 border rounded-md text-sm flex-grow"
-              />
-              <button className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm">
-                Enviar
-              </button>
-            </form>
-          </div>
+          
         </div>
       </div>
       
